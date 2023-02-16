@@ -3,6 +3,10 @@ import keyboard
 import mouse
 import fileinput
 
+from multiprocessing import Process
+from threading import Thread
+from time import sleep
+
 defaultTheme = 'DarkAmber'
 file = open('SelectedTheme.csv', 'r')
 SelectedTheme = file.read()
@@ -15,7 +19,6 @@ else:
 theme_name_list = sg.theme_list()
 savedTextsList = []
 savedTextsDict = {}
-savedHotkeysDict = {}
 
 modifiers = ['ctrl', 'shift', 'alt']
 keys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -30,7 +33,6 @@ class Gui:
 		self.mainWin()
 		self.newWin()
 		self.mainWin = sg.Window('Copied Texty', self.mainWin_layout,)
-
 	def mainWin(self):
 		tab1_layout = [[
 			sg.Text('Texty'),
@@ -38,18 +40,10 @@ class Gui:
 		],[
 			sg.Listbox(list(savedTextsDict.values()),
 			default_values = None,
-			size=(17,10),
+			size=(24,10),
 			key='__listBox__',
-			enable_events = True,
-			no_scrollbar = True,
-			p=((5,0),(0,0)),),			
-			sg.Listbox(list(savedHotkeysDict.values()),
-			default_values = None,
-			size=(9,10),
-			key='__hotkeyListbox__',
-			enable_events = True,
-			no_scrollbar = True,
-			p=((0,0),(0,0)),),
+			enable_events = True,),
+			
 		],[
 			sg.Button('New', s=(6,1),p=((5,4),(0,0)), key='__New__'),
 			sg.Button('Edit', s=(6,1), key='__Edit__'),
@@ -170,14 +164,9 @@ class Gui:
 					savedTextIndex = line.split(',')[0]
 					savedTextData = line.split(',')[1]
 					savedTextName = line.split(',')[5]
-					savedModOne = line.split(',')[2]
-					savedModTwo = line.split(',')[3]
-					savedHotkey = line.split(',')[4]
-					hotkeyData = [savedModOne, savedModTwo, savedHotkey]
 					dataForDict = savedTextData[0]
 					#print(savedTextIndex, savedTextData)
-					savedTextsDict[savedTextIndex] = savedTextName
-					savedHotkeysDict[savedTextIndex] = hotkeyData
+					savedTextsDict[savedTextIndex] = savedTextName 
 			file.close()
 
 	def mainLoop(self):
@@ -251,10 +240,6 @@ class Gui:
 						file.write(str(counter) + ',' + ','.join(lineSplit))
 						counter += 1
 				file.close()
-			if mainWin_event == '__listBox__':
-				print('working')
-				index = self.mainWin['__listBox__'].get_indexes()[0]
-				self.mainWin['__hotkeyListbox__'].update(set_to_index=[index],scroll_to_index=index)
 			if mainWin_event == '__theme__':
 				newTheme = mainWin_values['__theme__'][0]
 				sg.theme(newTheme)
@@ -264,12 +249,32 @@ class Gui:
 				self.mainWin.close()
 				main()
 
-
+class hotKeyThread(Thread):
+	def __init__(self):
+		#seperate csv and make vars here
+		#self.thread = threading.Thread
+		file = open("CopiedTextyData.csv", "r")
+		lines = file.readlines()
+		file.close()
+		self.Dict = {}
+	def startHotkeys(self):
+		number = 0;
+		while True:
+			number += 1
+			print(number)
+	def run(self):
+		self.thread = Process(target=self.startHotkeys, args=())
+		self.thread.start()
 
 def main():
-	myWin = Gui()
-	myWin.mainLoop()
-
+	#myWin = Gui()
+	#myWin.mainLoop()
+	threadDict = {}
+	for i in range(1):
+		test = hotKeyThread()
+		test.run()
+		sleep(5)
+		test.thread.kill()
 if __name__ == "__main__":
 	main()
 
