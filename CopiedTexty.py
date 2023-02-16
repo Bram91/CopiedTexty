@@ -2,7 +2,10 @@ import PySimpleGUI as sg
 import keyboard
 import mouse
 import fileinput
-import threading
+
+from multiprocessing import Process
+from threading import Thread
+from time import sleep
 
 defaultTheme = 'DarkAmber'
 file = open('SelectedTheme.csv', 'r')
@@ -246,32 +249,32 @@ class Gui:
 				self.mainWin.close()
 				main()
 
-class hotKeyThread(threading.Thread):
+class hotKeyThread(Thread):
 	def __init__(self):
 		#seperate csv and make vars here
-		self.thread = threading.Thread
+		#self.thread = threading.Thread
 		file = open("CopiedTextyData.csv", "r")
 		lines = file.readlines()
 		file.close()
 		self.Dict = {}
 	def startHotkeys(self):
-		#print('DELETING THREAD')
-		self.__del__()
+		number = 0;
+		while True:
+			number += 1
+			print(number)
 	def run(self):
-		self.thread = threading.Thread(target=self.startHotkeys, args=())
+		self.thread = Process(target=self.startHotkeys, args=())
 		self.thread.start()
-	def __del__(self):
-		return
 
 def main():
 	#myWin = Gui()
 	#myWin.mainLoop()
 	threadDict = {}
-	for i in range(10):
+	for i in range(1):
 		test = hotKeyThread()
 		test.run()
-	for thread in threading.enumerate():
-		print(thread.name)
+		sleep(5)
+		test.thread.kill()
 if __name__ == "__main__":
 	main()
 
